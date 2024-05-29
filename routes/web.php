@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\GlobalChatController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,7 +30,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/chat/{user_id}', [ChatController::class, 'index'])->middleware('auth');
+//private chat
+Route::get('/chat/{user_id}', [ChatController::class, 'index'])->name('chat.index')->middleware('auth');
 Route::post('/chat/{user_id}', [ChatController::class, 'store'])->middleware('auth');
+
+//global chat
+Route::get('/globalChat', [GlobalChatController::class, 'index'])->name('globalChat.index')->middleware('auth');
+Route::post('/globalChat', [GlobalChatController::class, 'store'])->middleware('auth');
 
 require __DIR__.'/auth.php';

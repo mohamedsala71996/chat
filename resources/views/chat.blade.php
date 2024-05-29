@@ -22,31 +22,20 @@
                     </div>
                 </div>
                 <div class="panel-body msg_container_base" id="chat_area">
-                    {{-- <div class="row msg_container base_sent">
-                        <div class="col-md-10 col-xs-10">
-                            <div class="messages msg_sent">
-                                <p>that mongodb thing looks good, huh?
-                                tiny master db, and huge document store</p>
-                                <time datetime="2009-11-13T20:00">Timothy • 51 min</time>
+                    @foreach($messages as $message)
+                        <div class="row msg_container ">
+                            <div class="col-md-2 col-xs-2 avatar">
+                                <img src="{{ asset($message->send->photo) }}" class="img-responsive">
+                            </div>
+                            <div class="col-md-10 col-xs-10">
+                                <div class="messages base_sent">
+                                    <p>{{ $message->message }}</p>
+                                    <time datetime="{{ $message->created_at }}">{{ $message->send->name }} • {{ $message->created_at->diffForHumans() }}</time>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-2 col-xs-2 avatar">
-                            <img src="{{ asset('assets/images/boy.jpg') }}" class=" img-responsive ">
-                        </div> --}}
-                    </div>
-
-                    <div class="row msg_container base_receive">
-                        {{-- <div class="col-md-2 col-xs-2 avatar">
-                            <img src="{{ asset('assets/images/boy.jpg') }}" class=" img-responsive ">
-                        </div>
-                        <div class="col-xs-10 col-md-10">
-                            <div class="messages msg_receive">
-                                <p>that mongodb thing looks good, huh?
-                                tiny master db, and huge document store</p>
-                                <time datetime="2009-11-13T20:00">Timothy • 51 min</time>
-                            </div>
-                        </div> --}}
-                    </div>
+                    @endforeach
+                </div>
 
                 </div>
                 <div class="panel-footer">
@@ -64,7 +53,7 @@
 </div>
 
 <script>
-  $('#btn-chat').click(function() {
+$('#btn-chat').click(function() {
     let message = $('#btn-input').val();
     if (message.trim() === '') return; // Prevent empty messages
 
@@ -75,15 +64,20 @@
     },
     function(data, status) {
         console.log("Data: " + data + "\nStatus: " + status);
+        
+        // Get current time
+        let now = dayjs();
+        let relativeTime = now.fromNow();
+
         let SenderMessage = '' +
-            '<div class="row msg_container base_receive">' +
+            '<div class="row msg_container ">' +
                 '<div class="col-md-2 col-xs-2 avatar">' +
                     '<img src="{{ asset(auth()->user()->photo) }}" class="img-responsive ">' +
                 '</div>' +
                 '<div class="col-xs-10 col-md-10">' +
                     '<div class="messages msg_receive">' +
                         '<p>' + message + '</p>' +
-                        '<time datetime="2009-11-13T20:00">Timothy • Just now</time>' +
+                        '<time datetime="' + now.toISOString() + '">'+data.name+' ' + relativeTime + '</time>' +
                     '</div>' +
                 '</div>' +
             '</div>';
@@ -93,41 +87,47 @@
     });
 });
 
+// Optional: Handle 'Enter' key press to send message
+$('#btn-input').keypress(function(e) {
+    if (e.which === 13) {
+        $('#btn-chat').click();
+    }
+});
 
-    // Optional: Handle 'Enter' key press to send message
-    $('#btn-input').keypress(function(e) {
-        if (e.which === 13) {
-            $('#btn-chat').click();
-        }
-    });
+// Enable pusher logging - don't include this in production
+Pusher.logToConsole = true;
 
-        // Enable pusher logging - don't include this in production
-        Pusher.logToConsole = true;
-
-        var pusher = new Pusher('47995e10bc1f452c241b', {
+var pusher = new Pusher('47995e10bc1f452c241b', {
     cluster: 'eu'
 });
 
 var channel = pusher.subscribe("chat{{ auth()->user()->id }}");
 channel.bind('ChatSent', function(data) {
-    let receiverMessage = '<div class="row msg_container base_sent">'+
-                             '<div class="col-md-10 col-xs-10">'+
-                                 '<div class="messages msg_sent">' +
+    // Get current time
+    let now = dayjs();
+    let relativeTime = now.fromNow();
+
+    let receiverMessage = '<div class="row msg_container base_sent">' +
+                             '<div class="col-md-10 col-xs-10">' +
+                                 '<div class="messages ">' +
                                      '<p>' + data.message + '</p>' +
-                                     '<time datetime="2009-11-13T20:00">Timothy • 51 min</time>'+
-                                 '</div>'+
-                             '</div>'+
-                             '<div class="col-md-2 col-xs-2 avatar">'+
-                                 '<img src="{{ asset($receiver->photo) }}" class=" img-responsive ">'+
-                             '</div>'+
+                                     '<time datetime="' + now.toISOString() + '">'+data.name+' ' + relativeTime + '</time>' +
+                                 '</div>' +
+                             '</div>' +
+                             '<div class="col-md-2 col-xs-2 avatar">' +
+                                 '<img src="{{ asset($receiver->photo) }}" class=" img-responsive ">' +
+                             '</div>' +
                          '</div>';
 
     $('#chat_area').append(receiverMessage);
-    $('#btn-input').val(''); // Clear the input field after sending
 });
-
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
+<script>
+    dayjs.extend(dayjs_plugin_relativeTime);
+</script>
 
 
 <script src="{{ asset('assets/js/chat.js') }}"></script>

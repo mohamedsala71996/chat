@@ -12,7 +12,8 @@ class ChatController extends Controller
     
     public function index($user_id){
         $receiver=User::find($user_id);
-        return view('chat',compact('receiver'));
+        $messages=Message::with(['send','receive'])->where('sender',auth()->user()->id)->where('receiver',$user_id)->orWhere('sender',$user_id)->where('receiver',auth()->user()->id)->get();
+        return view('chat',compact('receiver','messages'));
     }
     public function store(Request $request){
         $data=Message::create([
@@ -22,8 +23,11 @@ class ChatController extends Controller
         ]);
         $receiver=User::find($request->receiver_id);
         \broadcast(new ChatSent($receiver,$request->message));
-        return response()->json('Message sent successfully');
-    }
+        return response()->json([
+            'message' => $request->message,
+            'name' => auth()->user()->name,
+            'status' => 'success'
+        ]);    }
 
     
 }
