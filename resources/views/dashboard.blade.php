@@ -61,6 +61,25 @@
                             <br>
                             @endforeach
                         </div>
+                        <h2 class="h4 mb-3">Groups chat:</h2>
+                        @if (auth()->user()->adminOfGroup()->count() < 1)
+                        <form action="{{ route('groups.store') }}" method="post">
+                            @csrf
+                            <button type="submit" class="btn btn-primary btn-lg">Create own group chat</button>
+                            <br>
+                            <br>
+                        </form>
+                        @endif
+                        @php
+                        $groups=\App\Models\Group::get();
+                        @endphp
+                        <div class="pb-4">
+                            @foreach ($groups as $group)
+                            <a href="{{ url("group/$group->id") }}" target="_blank" class="btn btn-success btn-lg">{{ $group->name }} </a>
+                            <br>
+                            <br>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>

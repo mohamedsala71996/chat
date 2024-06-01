@@ -55,4 +55,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Message::class, 'receiver');
     }
+
+
+    public function adminOfGroup()
+    {
+        return $this->hasOne(Group::class, 'admin_id'); // user can be admin on one group only and group has only one admin 
+    }
 }

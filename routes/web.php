@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GlobalChatController;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,5 +38,13 @@ Route::post('/chat/{user_id}', [ChatController::class, 'store'])->middleware('au
 //global chat
 Route::get('/globalChat', [GlobalChatController::class, 'index'])->name('globalChat.index')->middleware('auth');
 Route::post('/globalChat', [GlobalChatController::class, 'store'])->middleware('auth');
+
+//groups chat
+Route::get('/group/{id}', [GroupController::class, 'index'])->middleware('auth');
+
+Route::post('/group/{id}', [GroupController::class, 'messageStore'])->middleware('auth');
+
+Route::post('/groups', [GroupController::class, 'store'])->name('groups.store')->middleware('auth');
+
 
 require __DIR__.'/auth.php';
